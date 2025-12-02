@@ -106,7 +106,7 @@ BIN = _bin/$(BOARD)
 ifeq ($(MCU_SUB_VARIANT),nrf52)
   SD_NAME = s132
   DFU_DEV_REV = 0xADAF
-  CFLAGS += -DNRF52 -DNRF52832_XXAA -DS132
+  CFLAGS += -DNRF52 -DNRF52832_XXAA -DS132 -D NRFX_GPIOTE_ENABLED
   DFU_APP_DATA_RESERVED=7*4096
 else ifeq ($(MCU_SUB_VARIANT),nrf52833)
   SD_NAME = s140
@@ -142,6 +142,8 @@ C_SRC += src/boards/boards.c
 # nrfx
 C_SRC += $(NRFX_PATH)/drivers/src/nrfx_power.c
 C_SRC += $(NRFX_PATH)/drivers/src/nrfx_nvmc.c
+C_SRC += $(NRFX_PATH)/drivers/src/nrfx_gpiote.c
+C_SRC += $(NRFX_PATH)/drivers/src/nrfx_systick.c
 C_SRC += $(NRFX_PATH)/mdk/system_$(MCU_SUB_VARIANT).c
 
 # SDK 11 files: serial + OTA DFU
