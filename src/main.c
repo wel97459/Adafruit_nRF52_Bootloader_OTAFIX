@@ -83,10 +83,14 @@
 
   static void gpiote_handler(nrfx_gpiote_pin_t pin, nrf_gpiote_polarity_t action)
   {
-      if (pin == WAKE_PIN && action == NRF_GPIOTE_POLARITY_LOTOHI)
-      {
-          done_pulse();   // Tell TPL5010 we are alive
-      }
+    if (pin == WAKE_PIN)
+    {
+        // Clear the latched GPIOTE event - CRITICAL
+        nrfx_gpiote_in_event_disable(WAKE_PIN);
+        // Optional: small delay if bouncing (usually not needed)
+        done_pulse();  // Tell TPL5010 we're awake and processing
+        nrfx_gpiote_in_event_enable(WAKE_PIN, true);
+    }
   }
 
   void init_wdt(void){
@@ -112,10 +116,10 @@
         .skip_gpio_setup = false
     };
 
-     nrfx_gpiote_in_init(DONE_PIN, &in_config, gpiote_handler);
+     nrfx_gpiote_in_init(WAKE_PIN, &in_config, gpiote_handler);
 
     // Enable interrupt for the pin
-    nrfx_gpiote_in_event_enable(DONE_PIN, true);
+    nrfx_gpiote_in_event_enable(WAKE_PIN, true);
 
     done_pulse();
   }
@@ -224,12 +228,15 @@ int main(void) {
   // TODO move to CF2
   BOOTLOADER_VERSION_REGISTER = (MK_BOOTLOADER_VERSION);
 
+
+
+  board_init();
+  bootloader_init();
+
   #ifdef WDT_ENABLED
   init_wdt();
   #endif
 
-  board_init();
-  bootloader_init();
   PRINTF("Bootloader Start\r\n");
   led_state(STATE_BOOTLOADER_STARTED);
 

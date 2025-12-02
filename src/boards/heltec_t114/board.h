@@ -66,8 +66,8 @@
 //--------------------------------------------------------------------+
 
 #define WDT_ENABLED       1
-#define WAKE_PIN   13   // P0.13
-#define DONE_PIN   11   // P0.11
+#define WAKE_PIN   _PINNUM(0, 13)   // P0.13
+#define DONE_PIN   _PINNUM(0, 11)   // P0.11
 
 //------------- UF2 -------------//
 #define UF2_PRODUCT_NAME      "HT-n5262"
