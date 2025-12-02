@@ -31,10 +31,13 @@
 #include "app_timer.h"
 
 #include "boards.h"
+#include "tpl5010.h"
 
 #ifdef NRF_USBD
 #include "tusb.h"
 #endif
+
+
 
 /**@brief Enumeration for specifying current bootloader status.
  */
@@ -109,11 +112,17 @@ static void dfu_startup_timer_handler(void * p_context)
  */
 static void wait_for_events(void)
 {
+  #ifdef WDT_ENABLED
+  tpl5010_init();
+  #endif
   for ( ;; )
   {
     // Wait in low power state for any events.
 //    uint32_t err_code = sd_app_evt_wait();
 //    APP_ERROR_CHECK(err_code);
+    #ifdef WDT_ENABLED
+    tpl5010_kick_if_needed();
+    #endif
 
     // Feed all Watchdog just in case application enable it
     // WDT cannot be disabled once started. It even last through NVIC soft reset
@@ -349,6 +358,9 @@ uint32_t bootloader_dfu_start(bool ota, uint32_t timeout_ms, bool cancel_timeout
     err_code = dfu_transport_serial_update_start();
   }
 
+  #ifdef WDT_ENABLED
+  tpl5010_init();
+  #endif
   wait_for_events();
 
   return err_code;

@@ -55,9 +55,6 @@
 #include "nrf_nvic.h"
 #include "app_error.h"
 #include "nrf_gpio.h"
-#include "nrfx_config.h"
-#include "nrfx_gpiote.h"
-#include "nrfx_systick.h"
 #include "nrf_power.h"
 #include "ble.h"
 #include "nrf.h"
@@ -72,58 +69,7 @@
 #include "pstorage.h"
 #include "nrfx_nvmc.h"
 
-
-#ifdef WDT_ENABLED
-  static void done_pulse(void)
-  {
-      nrfx_gpiote_out_set(DONE_PIN);
-      nrf_delay_us(200);           // >100 µs is enough, 200 µs for margin
-      nrfx_gpiote_out_clear(DONE_PIN);
-  }
-
-  static void gpiote_handler(nrfx_gpiote_pin_t pin, nrf_gpiote_polarity_t action)
-  {
-    if (pin == WAKE_PIN)
-    {
-        // Clear the latched GPIOTE event - CRITICAL
-        nrfx_gpiote_in_event_disable(WAKE_PIN);
-        // Optional: small delay if bouncing (usually not needed)
-        done_pulse();  // Tell TPL5010 we're awake and processing
-        nrfx_gpiote_in_event_enable(WAKE_PIN, true);
-    }
-  }
-
-  void init_wdt(void){
-    nrfx_systick_init();         // for nrf_delay_ms/us
- 
-
-    // DONE pin – normal output
-    nrfx_gpiote_out_config_t out_config = NRFX_GPIOTE_CONFIG_OUT_SIMPLE(false);
-    nrfx_gpiote_out_init(DONE_PIN, &out_config);
-
-    // Initialize GPIOTE driver (must be done once)
-    nrfx_gpiote_init(NRFX_GPIOTE_DEFAULT_CONFIG_IRQ_PRIORITY);
-
-
-    nrfx_gpiote_in_config_t in_config = {
-        .sense = NRF_GPIOTE_POLARITY_LOTOHI,   // Interrupt on rising edge
-        // .sense = NRF_GPIOTE_POLARITY_HITOLO,   // Falling edge (typical for button to GND)
-        // .sense = NRF_GPIOTE_POLARITY_TOGGLE,   // Toggle (low-power detect on nRF52)
-
-        .pull = NRF_GPIO_PIN_PULLDOWN,           // Important for button connected to GND
-        .is_watcher = false,
-        .hi_accuracy = true,                   // High accuracy = LATCH used (required for SENSE on nRF52)
-        .skip_gpio_setup = false
-    };
-
-     nrfx_gpiote_in_init(WAKE_PIN, &in_config, gpiote_handler);
-
-    // Enable interrupt for the pin
-    nrfx_gpiote_in_event_enable(WAKE_PIN, true);
-
-    done_pulse();
-  }
-#endif
+#include "tpl5010.h"
 
 #ifdef NRF_USBD
 
@@ -234,7 +180,7 @@ int main(void) {
   bootloader_init();
 
   #ifdef WDT_ENABLED
-  init_wdt();
+  tpl5010_init();
   #endif
 
   PRINTF("Bootloader Start\r\n");
