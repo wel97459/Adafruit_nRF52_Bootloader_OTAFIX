@@ -34,11 +34,6 @@
 #define LED_PRIMARY_PIN       _PINNUM(0, 14) // Green
 #define LED_STATE_ON          0
 
-#define LED_NEOPIXEL          _PINNUM(0, 15)
-#define NEOPIXEL_POWER_PIN    _PINNUM(0, 21)
-#define NEOPIXELS_NUMBER      2
-#define BOARD_RGB_BRIGHTNESS  0x040404
-
 /*------------------------------------------------------------------*/
 /* BUTTON
  *------------------------------------------------------------------*/
@@ -59,7 +54,6 @@
 #define USB_DESC_VID           0x239A
 #define USB_DESC_UF2_PID       0x0071
 #define USB_DESC_CDC_ONLY_PID  0x0071
-
 
 //--------------------------------------------------------------------+
 // WDT
